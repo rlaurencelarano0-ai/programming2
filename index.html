@@ -1075,7 +1075,9 @@
     // ----------------------------------------------------
     function calculateMetrics() {
       const totalOrders = orders.length;
-      const totalRevenue = orders.reduce((sum, order) => sum + order.totalAmount, 0);
+      const totalRevenue = orders
+        .filter(order => order.status !== "Pending")
+        .reduce((sum, order) => sum + order.totalAmount, 0);
       const pendingDeliveries = orders.filter(order => order.status === "Pending").length;
 
       elements.metricTotalOrders.textContent = totalOrders;
