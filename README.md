@@ -12,7 +12,7 @@ Pick **ONE** of these easy methods to open the app on your computer:
 
 ###  Option 1: Double-Click (Zero Setup! 🖱️)
 The simplest way! Works on any computer.
-1. Find the file [index.html](file:///d:/skibidi/programming2/index.html) in your folder.
+1. Find the file [index.html](file:/programming2/index.html) in your folder.
 2. **Double-click** it.
 3. It will instantly open in your web browser!
 
@@ -22,7 +22,7 @@ The simplest way! Works on any computer.
 If you are using Visual Studio Code:
 1. Open VS Code and search the Extensions tab for **"Live Server"** (by Ritwick Dey).
 2. Click **Install**.
-3. Open your [index.html](file:///d:/skibidi/programming2/index.html) file, then click the **"Go Live"** button in the bottom-right corner of VS Code.
+3. Open your [index.html](file:/programming2/index.html) file, then click the **"Go Live"** button in the bottom-right corner of VS Code.
 4. Your browser will open the page automatically at `http://127.0.0.1:5500/`.
 
 ---
