@@ -69,6 +69,50 @@
     .toast-animate {
       animation: slideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     }
+
+    @media (max-width: 768px) {
+      .responsive-table thead {
+        display: none;
+      }
+      .responsive-table tr {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+        margin-bottom: 1rem;
+        border-bottom: 1px solid rgba(148, 163, 184, 0.16);
+      }
+      .responsive-table td {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.75rem 0;
+        border: none;
+      }
+      .responsive-table td[data-label]::before {
+        content: attr(data-label);
+        color: #94a3b8;
+        font-size: 0.72rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        flex-shrink: 0;
+        min-width: 7rem;
+      }
+      .responsive-table td[data-label="Apparel / Size"],
+      .responsive-table td[data-label="Customer Details"] {
+        align-items: flex-start;
+      }
+      .responsive-table td[data-label="Actions"] {
+        justify-content: flex-end;
+      }
+      .responsive-table td > div {
+        width: 100%;
+      }
+      .responsive-table td[data-label="Order ID"] {
+        justify-content: space-between;
+      }
+    }
   </style>
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans selection:bg-indigo-500 selection:text-white antialiased">
@@ -237,6 +281,14 @@
                 <i class="fa-solid fa-chevron-down text-xs"></i>
               </span>
             </div>
+
+          <!-- Product Image Preview -->
+          <div id="product-image-preview" class="mt-3 p-4 rounded-3xl bg-slate-950/80 border border-slate-800 flex items-center gap-4">
+            <img id="preview-img" src="https://images.unsplash.com/photo-1520975916-4b34b1f54188?auto=format&fit=crop&w=400&q=80" alt="Product preview" class="w-20 h-20 rounded-3xl object-cover border border-slate-800 shadow-lg shadow-slate-950/20" />
+            <div>
+              <p id="preview-item-name" class="text-sm font-semibold text-slate-200">Select an item to preview</p>
+              <p class="text-xs text-slate-500 mt-1">Product image shown here when you choose an apparel item.</p>
+            </div>
           </div>
 
           <!-- Size Dropdown -->
@@ -348,7 +400,7 @@
       </div>
 
       <!-- Right Column: The Data Table -->
-      <div class="lg:col-span-8 bg-slate-900/40 backdrop-blur-md rounded-2xl border border-slate-800/80 p-6 shadow-2xl flex flex-col space-y-6 h-full min-h-[600px]">
+      <div class="lg:col-span-8 bg-slate-900/40 backdrop-blur-md rounded-2xl border border-slate-800/80 p-6 shadow-2xl flex flex-col space-y-6 h-full min-h-[420px] sm:min-h-[600px]">
         
         <!-- Table Header & Controls -->
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -370,7 +422,7 @@
                 type="text" 
                 id="search-input" 
                 placeholder="Search orders..." 
-                class="w-full bg-slate-950/80 border border-slate-800 focus:border-indigo-500/80 rounded-lg py-2 pl-8.5 pr-3 text-xs text-slate-100 placeholder-slate-600 outline-none transition-all"
+                class="w-full bg-slate-950/80 border border-slate-800 focus:border-indigo-500/80 rounded-lg py-2 pl-10 pr-3 text-xs text-slate-100 placeholder-slate-600 outline-none transition-all"
               >
             </div>
             <!-- Status Filter -->
@@ -380,7 +432,7 @@
               </span>
               <select 
                 id="status-filter" 
-                class="w-full bg-slate-950/80 border border-slate-800 focus:border-indigo-500/80 rounded-lg py-2 pl-7.5 pr-8 text-xs text-slate-100 outline-none appearance-none transition-all"
+                class="w-full bg-slate-950/80 border border-slate-800 focus:border-indigo-500/80 rounded-lg py-2 pl-8 pr-8 text-xs text-slate-100 outline-none appearance-none transition-all"
               >
                 <option value="All">All Statuses</option>
                 <option value="Pending">Pending</option>
@@ -396,7 +448,7 @@
 
         <!-- Scrollable Table Container -->
         <div class="flex-grow overflow-x-auto border border-slate-850 rounded-xl bg-slate-950/50">
-          <table class="w-full text-left border-collapse">
+          <table class="w-full table-auto text-left border-collapse responsive-table min-w-full">
             <thead>
               <tr class="border-b border-slate-850 text-slate-400 text-xs font-semibold tracking-wider bg-slate-900/30">
                 <th class="py-3.5 px-4 font-bold">Order ID</th>
@@ -454,16 +506,40 @@
   <!-- JavaScript Program Logic -->
   <script>
     // ----------------------------------------------------
-    // Hardcoded Prices & Items Catalog
+    // Hardcoded Prices, Images & Items Catalog
     // ----------------------------------------------------
     const Catalog = {
-      "Classic Blazer": 85.00,
-      "Denim Jacket": 70.00,
-      "Pleated Skirt": 45.00,
-      "Floral Summer Dress": 60.00,
-      "Cashmere Sweater": 110.00,
-      "Leather Trench Coat": 195.00
+      "Classic Blazer": {
+        price: 85.00,
+        image: "https://images.unsplash.com/photo-1521334884684-d80222895322?auto=format&fit=crop&w=400&q=80"
+      },
+      "Denim Jacket": {
+        price: 70.00,
+        image: "https://images.unsplash.com/photo-1533692219905-7a5c9bff2fc1?auto=format&fit=crop&w=400&q=80"
+      },
+      "Pleated Skirt": {
+        price: 45.00,
+        image: "https://images.unsplash.com/photo-1541099649105-f69ad21f3246?auto=format&fit=crop&w=400&q=80"
+      },
+      "Floral Summer Dress": {
+        price: 60.00,
+        image: "https://images.unsplash.com/photo-1520975916-4b34b1f54188?auto=format&fit=crop&w=400&q=80"
+      },
+      "Cashmere Sweater": {
+        price: 110.00,
+        image: "https://images.unsplash.com/photo-1512436991641-6745cdb1723f?auto=format&fit=crop&w=400&q=80"
+      },
+      "Leather Trench Coat": {
+        price: 195.00,
+        image: "https://images.unsplash.com/photo-1503341455253-b2e723bb3dbb?auto=format&fit=crop&w=400&q=80"
+      }
     };
+
+    const DefaultProductImage = "https://images.unsplash.com/photo-1520975916-4b34b1f54188?auto=format&fit=crop&w=400&q=80";
+
+    function getProductImage(item) {
+      return (Catalog[item] && Catalog[item].image) || DefaultProductImage;
+    }
 
     // Mock initial data seeded only on first load
     const MockOrders = [
@@ -477,7 +553,8 @@
         price: 60.00,
         totalAmount: 120.00,
         status: "Delivered",
-        orderDate: "2026-05-16"
+        orderDate: "2026-05-16",
+        image: getProductImage("Floral Summer Dress")
       },
       {
         id: "RTW-1002",
@@ -534,6 +611,8 @@
       previewUnitPrice: document.getElementById('preview-unit-price'),
       previewQty: document.getElementById('preview-qty'),
       previewTotalAmount: document.getElementById('preview-total-amount'),
+      previewImg: document.getElementById('preview-img'),
+      previewItemName: document.getElementById('preview-item-name'),
 
       // Buttons
       submitBtn: document.getElementById('submit-btn'),
@@ -637,12 +716,21 @@
       const selectedItem = elements.itemSelect.value;
       const quantity = parseInt(elements.orderQuantity.value) || 0;
       
-      const price = Catalog[selectedItem] || 0.00;
+      const price = Catalog[selectedItem] ? Catalog[selectedItem].price : 0.00;
       const total = price * quantity;
 
       elements.previewUnitPrice.textContent = `$${price.toFixed(2)}`;
       elements.previewQty.textContent = quantity;
       elements.previewTotalAmount.textContent = `$${total.toFixed(2)}`;
+      updateImagePreview();
+    }
+
+    function updateImagePreview() {
+      const selectedItem = elements.itemSelect.value;
+      const imageUrl = getProductImage(selectedItem);
+      elements.previewImg.src = imageUrl;
+      elements.previewImg.alt = selectedItem ? `${selectedItem} image` : 'Product preview';
+      elements.previewItemName.textContent = selectedItem ? selectedItem : 'Select an item to preview';
     }
 
     // Bind event listeners to update dynamic price preview automatically
@@ -714,35 +802,40 @@
           }
 
           row.innerHTML = `
-            <td class="py-3.5 px-4 font-semibold text-slate-300 font-mono text-xs">${order.id}</td>
-            <td class="py-3.5 px-4">
+            <td data-label="Order ID" class="py-3.5 px-4 font-semibold text-slate-300 font-mono text-xs">${order.id}</td>
+            <td data-label="Customer Details" class="py-3.5 px-4">
               <div class="font-medium text-slate-200">${escapeHTML(order.customerName)}</div>
               <div class="text-xs text-slate-500 select-all font-mono">${escapeHTML(order.email)}</div>
             </td>
-            <td class="py-3.5 px-4">
-              <div class="font-medium text-slate-200">${order.itemSelect}</div>
-              <div class="text-xs text-indigo-400 font-semibold bg-indigo-500/5 px-2 py-0.5 rounded border border-indigo-500/10 inline-block mt-0.5">Size: ${order.size}</div>
+            <td data-label="Apparel / Size" class="py-3.5 px-4">
+              <div class="flex items-center gap-3">
+                <img src="${order.image || getProductImage(order.itemSelect)}" alt="${order.itemSelect} image" class="w-14 h-14 rounded-2xl object-cover border border-slate-800 shadow-sm" />
+                <div>
+                  <div class="font-medium text-slate-200">${order.itemSelect}</div>
+                  <div class="text-xs text-indigo-400 font-semibold bg-indigo-500/5 px-2 py-0.5 rounded border border-indigo-500/10 inline-block mt-0.5">Size: ${order.size}</div>
+                </div>
+              </div>
             </td>
-            <td class="py-3.5 px-4 text-right font-semibold font-mono text-slate-300">${order.quantity}</td>
-            <td class="py-3.5 px-4 text-right font-bold font-mono text-indigo-300">$${order.totalAmount.toFixed(2)}</td>
-            <td class="py-3.5 px-4 text-center">
+            <td data-label="Quantity" class="py-3.5 px-4 text-right font-semibold font-mono text-slate-300">${order.quantity}</td>
+            <td data-label="Total Price" class="py-3.5 px-4 text-right font-bold font-mono text-indigo-300">$${order.totalAmount.toFixed(2)}</td>
+            <td data-label="Status" class="py-3.5 px-4 text-center">
               <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border ${statusBadgeClass}">
                 <span class="w-1.5 h-1.5 rounded-full ${pulseClass} ${order.status === 'Pending' ? 'pulse-dot' : ''}"></span>
                 ${order.status}
               </span>
             </td>
-            <td class="py-3.5 px-4 text-center">
+            <td data-label="Actions" class="py-3.5 px-4 text-center">
               <div class="flex items-center justify-center gap-1.5">
                 <button 
                   onclick="editOrder('${order.id}')"
-                  class="flex items-center justify-center w-7.5 h-7.5 rounded-lg bg-slate-900 hover:bg-indigo-500/10 border border-slate-800 hover:border-indigo-500/20 text-slate-400 hover:text-indigo-400 transition-all cursor-pointer shadow-sm"
+                  class="flex items-center justify-center w-9 h-9 rounded-lg bg-slate-900 hover:bg-indigo-500/10 border border-slate-800 hover:border-indigo-500/20 text-slate-400 hover:text-indigo-400 transition-all cursor-pointer shadow-sm"
                   title="Edit Order"
                 >
                   <i class="fa-solid fa-pen-to-square text-xs"></i>
                 </button>
                 <button 
                   onclick="deleteOrder('${order.id}')"
-                  class="flex items-center justify-center w-7.5 h-7.5 rounded-lg bg-slate-900 hover:bg-red-500/10 border border-slate-800 hover:border-red-500/20 text-slate-400 hover:text-red-400 transition-all cursor-pointer shadow-sm"
+                  class="flex items-center justify-center w-9 h-9 rounded-lg bg-slate-900 hover:bg-red-500/10 border border-slate-800 hover:border-red-500/20 text-slate-400 hover:text-red-400 transition-all cursor-pointer shadow-sm"
                   title="Delete Order"
                 >
                   <i class="fa-solid fa-trash-can text-xs"></i>
@@ -815,7 +908,8 @@
             quantity: quantityVal,
             price: price,
             totalAmount: totalAmount,
-            status: updatedStatus
+            status: updatedStatus,
+            image: getProductImage(itemSelectVal)
           };
 
           saveToStorage();
@@ -838,7 +932,8 @@
           price: price,
           totalAmount: totalAmount,
           status: "Pending", // Default on creation
-          orderDate: todayString
+          orderDate: todayString,
+          image: getProductImage(itemSelectVal)
         };
 
         orders.push(newOrder);
