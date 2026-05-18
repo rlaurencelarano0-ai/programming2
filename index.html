@@ -472,6 +472,8 @@
   <div id="toast-container" class="fixed bottom-6 right-6 z-50 flex flex-col gap-2.5 max-w-sm w-full pointer-events-none"></div>
 
   <!-- JavaScript Program Logic -->
+  <script src="config.js" onerror="console.info('Optional config.js not found. Supabase fallback will use browser storage until configured.')"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.33.0/dist/umd/supabase.js"></script>
   <script>
     // ----------------------------------------------------
     // Hardcoded Prices, Images & Items Catalog
@@ -661,9 +663,92 @@
     updateClock();
 
     // ----------------------------------------------------
+    // Supabase Remote Database Integration
+    const SUPABASE_URL = (window.SUPABASE_URL || '').trim();
+    const SUPABASE_ANON_KEY = (window.SUPABASE_ANON_KEY || '').trim();
+    const isSupabaseConfigured = Boolean(SUPABASE_URL && SUPABASE_ANON_KEY && window.Supabase);
+    const supabase = isSupabaseConfigured ? window.Supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
+
+    async function fetchOrdersFromSupabase() {
+      if (!supabase) return null;
+      const { data, error } = await supabase.from('orders').select('*').order('orderDate', { ascending: false });
+      if (error) {
+        console.error('Supabase fetch error:', error);
+        showToast('Supabase is unreachable. Falling back to local browser cache.', 'error');
+        return null;
+      }
+      return data.map(row => ({
+        id: row.id,
+        customerName: row.customerName,
+        email: row.email,
+        itemSelect: row.itemSelect,
+        size: row.size,
+        quantity: Number(row.quantity) || 1,
+        price: Number(row.price) || 0.00,
+        totalAmount: Number(row.totalAmount) || 0.00,
+        status: row.status || 'Pending',
+        orderDate: row.orderDate ? String(row.orderDate).split('T')[0] : new Date().toISOString().split('T')[0],
+        image: row.image || getProductImage(row.itemSelect)
+      }));
+    }
+
+    async function saveOrderToSupabase(order) {
+      if (!supabase) return false;
+      const payload = {
+        id: order.id,
+        customerName: order.customerName,
+        email: order.email,
+        itemSelect: order.itemSelect,
+        size: order.size,
+        quantity: Number(order.quantity) || 1,
+        price: Number(order.price) || 0.00,
+        totalAmount: Number(order.totalAmount) || 0.00,
+        status: order.status,
+        orderDate: order.orderDate,
+        image: order.image
+      };
+      const { error } = await supabase.from('orders').upsert(payload, { onConflict: 'id' });
+      if (error) {
+        console.error('Supabase save error:', error);
+        showToast('Unable to sync order with Supabase. Data is still saved locally.', 'error');
+        return false;
+      }
+      return true;
+    }
+
+    async function deleteOrderFromSupabase(id) {
+      if (!supabase) return false;
+      const { error } = await supabase.from('orders').delete().eq('id', id);
+      if (error) {
+        console.error('Supabase delete error:', error);
+        showToast('Unable to delete order from Supabase. Local state was updated.', 'error');
+        return false;
+      }
+      return true;
+    }
+
+    async function clearSupabaseOrders() {
+      if (!supabase) return false;
+      const { error } = await supabase.from('orders').delete().neq('id', '');
+      if (error) {
+        console.error('Supabase reset error:', error);
+        showToast('Unable to clear orders from Supabase. Local storage was reset.', 'error');
+        return false;
+      }
+      return true;
+    }
+
+    async function syncLocalToSupabase() {
+      if (!supabase || orders.length === 0) return;
+      for (const order of orders) {
+        await saveOrderToSupabase(order);
+      }
+    }
+
+    // ----------------------------------------------------
     // State Persistence (Local Storage)
     // ----------------------------------------------------
-    function initStorage() {
+    async function initStorage() {
       const raw = localStorage.getItem('modafit_orders');
       if (raw) {
         try {
@@ -709,10 +794,27 @@
           saveToStorage();
         }
       } else {
-        // Seed database
         orders = [...MockOrders];
         saveToStorage();
         showToast("System initialized with curated mock RTW orders.", "info");
+      }
+
+      if (isSupabaseConfigured) {
+        const remoteOrders = await fetchOrdersFromSupabase();
+        if (remoteOrders) {
+          if (remoteOrders.length > 0) {
+            orders = remoteOrders;
+            saveToStorage();
+            showToast('Supabase connected. Loaded remote orders.', 'success');
+          } else if (!raw) {
+            showToast('Supabase connected. No remote orders found yet.', 'info');
+            await syncLocalToSupabase();
+          } else {
+            await syncLocalToSupabase();
+          }
+        }
+      } else {
+        showToast('Supabase is not configured. Local browser storage is active.', 'info');
       }
     }
 
@@ -955,7 +1057,7 @@
     // ----------------------------------------------------
     // CRUD: Create & Update Submissions
     // ----------------------------------------------------
-    elements.orderForm.addEventListener('submit', function (e) {
+    elements.orderForm.addEventListener('submit', async function (e) {
       e.preventDefault();
 
       const customerNameVal = elements.customerName.value.trim();
@@ -996,6 +1098,7 @@
           };
 
           saveToStorage();
+          if (isSupabaseConfigured) await saveOrderToSupabase(orders[orderIndex]);
           showToast(`Order ${targetId} successfully updated.`, "success");
           resetForm();
           render();
@@ -1021,6 +1124,7 @@
 
         orders.push(newOrder);
         saveToStorage();
+        if (isSupabaseConfigured) await saveOrderToSupabase(newOrder);
         showToast(`Order ${nextId} successfully placed.`, "success");
         resetForm();
         render();
@@ -1088,7 +1192,7 @@
     // ----------------------------------------------------
     // CRUD: Delete Module
     // ----------------------------------------------------
-    window.deleteOrder = function (id) {
+    window.deleteOrder = async function (id) {
       const order = orders.find(o => o.id === id);
       if (!order) return;
 
@@ -1102,17 +1206,19 @@
         }
 
         saveToStorage();
+        if (isSupabaseConfigured) await deleteOrderFromSupabase(id);
         showToast(`Order ${id} has been deleted.`, "info");
         render();
       }
     };
 
     // Reset whole system logic
-    elements.clearDataBtn.addEventListener('click', () => {
+    elements.clearDataBtn.addEventListener('click', async () => {
       const confirmReset = confirm("CRITICAL OPERATION:\nAre you sure you want to completely factory-reset all local order database storage? This resets mock states.");
       if (confirmReset) {
         localStorage.removeItem('modafit_orders');
-        initStorage();
+        if (isSupabaseConfigured) await clearSupabaseOrders();
+        await initStorage();
         resetForm();
         render();
         showToast("System local database factory-reset.", "info");

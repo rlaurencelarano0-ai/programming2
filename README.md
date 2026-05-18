@@ -1,8 +1,8 @@
 # 👕 ModaFit RTW - Order Management System
 
-A beautiful, simple **Ready-to-Wear (RTW) clothing ordering system** built with just **HTML, CSS (Tailwind), and Javascript**. 
+A beautiful, simple **Ready-to-Wear (RTW) clothing ordering system** built with **HTML, Tailwind, and JavaScript**.
 
-Everything is saved in your browser's **Local Storage**! That means if you refresh the page, your data stays saved. No databases required! 🚀
+This version includes support for **production-ready Supabase persistence** while still allowing a local browser storage fallback when Supabase is not configured.
 
 ---
 
@@ -34,11 +34,65 @@ Open your terminal (Command Prompt / PowerShell) in this folder and run:
 ```bash
 python -m http.server 8080
 ```
+
+
+
+
+
 **Or using Node.js:**
 ```bash
 npx http-server -p 8080
 ```
+
+
+
+
+
+
+
 Now open your browser and go to: 👉 **[http://localhost:8080/](http://localhost:8080/)**
+
+---
+
+## 🚀 Production Setup with Supabase
+
+This project can persist orders to Supabase in production. The app reads `window.SUPABASE_URL` and `window.SUPABASE_ANON_KEY` from `config.js`, which can be generated during build time on Vercel.
+
+### Setup Steps
+1. Create a Supabase project.
+2. Create an `orders` table with these columns:
+   * `id` (text, primary key)
+   * `customerName` (text)
+   * `email` (text)
+   * `itemSelect` (text)
+   * `size` (text)
+   * `quantity` (integer)
+   * `price` (numeric)
+   * `totalAmount` (numeric)
+   * `status` (text)
+   * `orderDate` (date)
+   * `image` (text)
+3. If using anonymous browser access, configure Row Level Security (RLS) policies or disable RLS for the `orders` table.
+4. Copy `.env.example` to `.env` and set your values:
+   * `NEXT_PUBLIC_SUPABASE_URL`
+   * `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
+5. Use the build script to generate `config.js` locally or on Vercel:
+   ```bash
+   npm install
+   npm run build
+   ```
+
+### Deploying to Vercel
+1. Add the environment variables to your Vercel project:
+   * `NEXT_PUBLIC_SUPABASE_URL`
+   * `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
+2. Set the Vercel build command to:
+   ```bash
+   npm run build
+   ```
+3. Deploy the site as a static project.
+
+> Vercel will generate `config.js` during the build step, so the app can use your Supabase credentials in the browser.
 
 ---
 
