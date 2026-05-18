@@ -666,7 +666,48 @@
     function initStorage() {
       const raw = localStorage.getItem('modafit_orders');
       if (raw) {
-        orders = JSON.parse(raw);
+        try {
+          orders = JSON.parse(raw);
+          // Run auto-migration / cleanup to recover from any malformed prices/totals
+          let migrated = false;
+          orders = orders.map(order => {
+            let updated = { ...order };
+            
+            // 1. Recover price if it's an object or malformed
+            if (typeof updated.price === 'object' || isNaN(Number(updated.price))) {
+              const item = updated.itemSelect;
+              updated.price = Catalog[item] ? Catalog[item].price : 0.00;
+              migrated = true;
+            } else {
+              updated.price = Number(updated.price);
+            }
+            
+            // 2. Recover totalAmount if it's NaN or malformed
+            if (isNaN(Number(updated.totalAmount)) || migrated) {
+              updated.totalAmount = updated.price * (parseInt(updated.quantity) || 1);
+              migrated = true;
+            } else {
+              updated.totalAmount = Number(updated.totalAmount);
+            }
+            
+            // 3. Make sure image is updated with new high-res Catalog images
+            const correctImage = getProductImage(updated.itemSelect);
+            if (updated.image !== correctImage) {
+              updated.image = correctImage;
+              migrated = true;
+            }
+            
+            return updated;
+          });
+          
+          if (migrated) {
+            saveToStorage();
+          }
+        } catch (e) {
+          console.error("Storage corruption. Seeding mockup.", e);
+          orders = [...MockOrders];
+          saveToStorage();
+        }
       } else {
         // Seed database
         orders = [...MockOrders];
@@ -929,7 +970,7 @@
         return;
       }
 
-      const price = Catalog[itemSelectVal] || 0.00;
+      const price = Catalog[itemSelectVal] ? Catalog[itemSelectVal].price : 0.00;
       const totalAmount = price * quantityVal;
       const todayString = new Date().toISOString().split('T')[0];
 
