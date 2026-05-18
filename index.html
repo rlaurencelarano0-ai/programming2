@@ -70,58 +70,6 @@
       animation: slideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     }
 
-    @media (max-width: 768px) {
-      .responsive-table thead {
-        display: none;
-      }
-      .responsive-table tr {
-        display: block;
-        padding: 1.25rem;
-        margin-bottom: 1.25rem;
-        background: rgba(15, 23, 42, 0.4);
-        border: 1px solid rgba(51, 65, 85, 0.4);
-        border-radius: 1.25rem;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-      }
-      .responsive-table td {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 0.625rem 0;
-        border-bottom: 1px dashed rgba(51, 65, 85, 0.3);
-      }
-      .responsive-table td:last-child {
-        border-bottom: none;
-        padding-bottom: 0;
-        margin-top: 0.5rem;
-      }
-      .responsive-table td:first-child {
-        padding-top: 0;
-      }
-      .responsive-table td[data-label]::before {
-        content: attr(data-label);
-        color: #64748b;
-        font-size: 0.7rem;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 0.08em;
-        flex-shrink: 0;
-        min-width: 6.5rem;
-      }
-      .responsive-table td[data-label="Customer Details"],
-      .responsive-table td[data-label="Apparel / Size"] {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 0.5rem;
-      }
-      .responsive-table td[data-label="Customer Details"]::before,
-      .responsive-table td[data-label="Apparel / Size"]::before {
-        margin-bottom: 0.125rem;
-      }
-      .responsive-table td > div {
-        width: 100%;
-      }
-    }
   </style>
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans selection:bg-indigo-500 selection:text-white antialiased">
@@ -294,7 +242,7 @@
 
           <!-- Product Image Preview (Hidden by default, shown when item is selected) -->
           <div id="product-image-preview" class="hidden mt-3 p-4 rounded-2xl bg-slate-950/80 border border-slate-800 items-center gap-4">
-            <img id="preview-img" src="" alt="Product preview" class="w-20 h-20 rounded-2xl object-cover border border-slate-800 shadow-lg shadow-slate-950/20" />
+            <img id="preview-img" src="" alt="Product preview" class="w-20 h-20 rounded-2xl object-cover border border-slate-800 shadow-lg shadow-slate-950/20" onerror="this.src=DefaultProductImage" />
             <div>
               <p id="preview-item-name" class="text-sm font-semibold text-slate-200"></p>
               <p class="text-xs text-slate-500 mt-1">Product preview loaded successfully.</p>
@@ -456,27 +404,36 @@
           </div>
         </div>
 
-        <!-- Scrollable Table Container -->
-        <div class="flex-grow overflow-x-auto border border-slate-850 rounded-xl bg-slate-950/50">
-          <table class="w-full table-auto text-left border-collapse responsive-table min-w-full">
-            <thead>
-              <tr class="border-b border-slate-850 text-slate-400 text-xs font-semibold tracking-wider bg-slate-900/30">
-                <th class="py-3.5 px-4 font-bold">Order ID</th>
-                <th class="py-3.5 px-4 font-bold">Customer Details</th>
-                <th class="py-3.5 px-4 font-bold">Apparel / Size</th>
-                <th class="py-3.5 px-4 font-bold text-right">Qty</th>
-                <th class="py-3.5 px-4 font-bold text-right">Total Price</th>
-                <th class="py-3.5 px-4 font-bold text-center">Status</th>
-                <th class="py-3.5 px-4 font-bold text-center">Actions</th>
-              </tr>
-            </thead>
-            <tbody id="orders-tbody" class="divide-y divide-slate-850 text-sm">
-              <!-- Dynamically Populated Rows -->
-            </tbody>
-          </table>
+        <!-- Scrollable Container Wrapper -->
+        <div class="flex-grow flex flex-col min-h-0">
+          
+          <!-- Desktop Table View (Hidden on mobile) -->
+          <div class="hidden md:block overflow-x-auto border border-slate-850 rounded-xl bg-slate-950/50">
+            <table class="w-full table-auto text-left border-collapse min-w-full">
+              <thead>
+                <tr class="border-b border-slate-850 text-slate-400 text-xs font-semibold tracking-wider bg-slate-900/30">
+                  <th class="py-3.5 px-4 font-bold">Order ID</th>
+                  <th class="py-3.5 px-4 font-bold">Customer Details</th>
+                  <th class="py-3.5 px-4 font-bold">Apparel / Size</th>
+                  <th class="py-3.5 px-4 font-bold text-right">Qty</th>
+                  <th class="py-3.5 px-4 font-bold text-right">Total Price</th>
+                  <th class="py-3.5 px-4 font-bold text-center">Status</th>
+                  <th class="py-3.5 px-4 font-bold text-center">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="orders-tbody" class="divide-y divide-slate-850 text-sm">
+                <!-- Dynamically Populated Rows -->
+              </tbody>
+            </table>
+          </div>
 
-          <!-- Empty State (Hidden when items exist) -->
-          <div id="empty-state" class="hidden flex-col items-center justify-center p-12 text-center space-y-4">
+          <!-- Mobile Cards View (Hidden on desktop) -->
+          <div id="orders-cards-mobile" class="md:hidden space-y-4 overflow-y-auto max-h-[600px] min-h-0 pr-1">
+            <!-- Dynamically Populated Cards -->
+          </div>
+
+          <!-- Empty State (Hidden when items exist, fits both desktop & mobile views) -->
+          <div id="empty-state" class="hidden flex-col items-center justify-center p-12 text-center space-y-4 border border-slate-850 rounded-xl bg-slate-950/30">
             <div class="w-16 h-16 rounded-full bg-slate-900/80 border border-slate-800 flex items-center justify-center text-slate-600 text-2xl">
               <i class="fa-solid fa-inbox"></i>
             </div>
@@ -485,6 +442,7 @@
               <p class="text-xs text-slate-500 mt-1 max-w-[280px]">Add some orders using the left-hand placement form or adjust your search filters.</p>
             </div>
           </div>
+
         </div>
 
         <!-- Footer / Record Count inside Right Column -->
@@ -545,7 +503,7 @@
       }
     };
 
-    const DefaultProductImage = "https://images.unsplash.com/photo-1520975916-4b34b1f54188?auto=format&fit=crop&w=400&q=80";
+    const DefaultProductImage = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="%23818cf8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.38 3.46L16 2a4 4 0 0 0-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.85 5.68a2 2 0 0 0 2 1.71h1.16v7.35a2 2 0 0 0 2 2h7.43a2 2 0 0 0 2-2V13.1h1.16a2 2 0 0 0 2-1.71l.85-5.68a2 2 0 0 0-1.34-2.23z"/></svg>`;
 
     function getProductImage(item) {
       return (Catalog[item] && Catalog[item].image) || DefaultProductImage;
@@ -635,6 +593,7 @@
 
       // Table & Registry UI
       ordersTbody: document.getElementById('orders-tbody'),
+      ordersCardsMobile: document.getElementById('orders-cards-mobile'),
       emptyState: document.getElementById('empty-state'),
       searchInput: document.getElementById('search-input'),
       statusFilter: document.getElementById('status-filter'),
@@ -796,8 +755,9 @@
         return matchesSearch && matchesStatus;
       });
 
-      // Clear Table Body
+      // Clear Table & Cards
       elements.ordersTbody.innerHTML = '';
+      elements.ordersCardsMobile.innerHTML = '';
 
       if (filteredOrders.length === 0) {
         elements.emptyState.classList.remove('hidden');
@@ -807,9 +767,6 @@
         elements.emptyState.classList.remove('flex');
 
         filteredOrders.forEach(order => {
-          const row = document.createElement('tr');
-          row.className = "hover:bg-slate-900/35 transition-colors border-b border-slate-850 group/row";
-          
           // Color-coded status badge configuration
           let statusBadgeClass = "";
           let pulseClass = "";
@@ -824,41 +781,48 @@
             pulseClass = "bg-emerald-400";
           }
 
+          // 1. Create Desktop Row
+          const row = document.createElement('tr');
+          row.className = "hover:bg-slate-900/35 transition-colors border-b border-slate-850 group/row";
+          
           row.innerHTML = `
-            <td data-label="Order ID" class="py-3.5 px-4 font-semibold text-slate-300 font-mono text-xs">${order.id}</td>
-            <td data-label="Customer Details" class="py-3.5 px-4">
+            <td class="py-3.5 px-4 font-semibold text-slate-300 font-mono text-xs">${order.id}</td>
+            <td class="py-3.5 px-4">
               <div class="font-medium text-slate-200">${escapeHTML(order.customerName)}</div>
               <div class="text-xs text-slate-500 select-all font-mono">${escapeHTML(order.email)}</div>
             </td>
-            <td data-label="Apparel / Size" class="py-3.5 px-4">
+            <td class="py-3.5 px-4">
               <div class="flex items-center gap-3">
-                <img src="${order.image || getProductImage(order.itemSelect)}" alt="${order.itemSelect} image" class="w-14 h-14 rounded-2xl object-cover border border-slate-800 shadow-sm" />
+                <img src="${order.image || getProductImage(order.itemSelect)}" 
+                     alt="${order.itemSelect} image" 
+                     class="w-10 h-10 rounded-xl object-cover border border-slate-800 shadow-sm"
+                     onerror="this.src='${DefaultProductImage}'" />
                 <div>
-                  <div class="font-medium text-slate-200">${order.itemSelect}</div>
-                  <div class="text-xs text-indigo-400 font-semibold bg-indigo-500/5 px-2 py-0.5 rounded border border-indigo-500/10 inline-block mt-0.5">Size: ${order.size}</div>
+                  <div class="font-medium text-slate-200 text-xs">${order.itemSelect}</div>
+                  <div class="text-[10px] text-indigo-400 font-semibold bg-indigo-500/5 px-2 py-0.5 rounded border border-indigo-500/10 inline-block mt-0.5">Size: ${order.size}</div>
                 </div>
               </div>
             </td>
-            <td data-label="Quantity" class="py-3.5 px-4 text-right font-semibold font-mono text-slate-300">${order.quantity}</td>
-            <td data-label="Total Price" class="py-3.5 px-4 text-right font-bold font-mono text-indigo-300">$${order.totalAmount.toFixed(2)}</td>
-            <td data-label="Status" class="py-3.5 px-4 text-center">
-              <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border ${statusBadgeClass}">
+            <td class="py-3.5 px-4 text-right font-semibold font-mono text-slate-300 text-xs">${order.quantity}</td>
+            <td class="py-3.5 px-4 text-right font-bold font-mono text-indigo-300 text-xs">$${order.totalAmount.toFixed(2)}</td>
+            <td class="py-3.5 px-4 text-center">
+              <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold border ${statusBadgeClass}">
                 <span class="w-1.5 h-1.5 rounded-full ${pulseClass} ${order.status === 'Pending' ? 'pulse-dot' : ''}"></span>
                 ${order.status}
               </span>
             </td>
-            <td data-label="Actions" class="py-3.5 px-4 text-center">
+            <td class="py-3.5 px-4 text-center">
               <div class="flex items-center justify-center gap-1.5">
                 <button 
                   onclick="editOrder('${order.id}')"
-                  class="flex items-center justify-center w-9 h-9 rounded-lg bg-slate-900 hover:bg-indigo-500/10 border border-slate-800 hover:border-indigo-500/20 text-slate-400 hover:text-indigo-400 transition-all cursor-pointer shadow-sm"
+                  class="flex items-center justify-center w-8 h-8 rounded-lg bg-slate-900 hover:bg-indigo-500/10 border border-slate-800 hover:border-indigo-500/20 text-slate-400 hover:text-indigo-400 transition-all cursor-pointer shadow-sm"
                   title="Edit Order"
                 >
                   <i class="fa-solid fa-pen-to-square text-xs"></i>
                 </button>
                 <button 
                   onclick="deleteOrder('${order.id}')"
-                  class="flex items-center justify-center w-9 h-9 rounded-lg bg-slate-900 hover:bg-red-500/10 border border-slate-800 hover:border-red-500/20 text-slate-400 hover:text-red-400 transition-all cursor-pointer shadow-sm"
+                  class="flex items-center justify-center w-8 h-8 rounded-lg bg-slate-900 hover:bg-red-500/10 border border-slate-800 hover:border-red-500/20 text-slate-400 hover:text-red-400 transition-all cursor-pointer shadow-sm"
                   title="Delete Order"
                 >
                   <i class="fa-solid fa-trash-can text-xs"></i>
@@ -866,8 +830,63 @@
               </div>
             </td>
           `;
-
           elements.ordersTbody.appendChild(row);
+
+          // 2. Create Mobile Card
+          const card = document.createElement('div');
+          card.className = "bg-slate-900/40 border border-slate-800/80 rounded-2xl p-4.5 space-y-4 hover:border-slate-700/60 transition-all duration-300";
+          card.innerHTML = `
+            <div class="flex items-center justify-between border-b border-slate-800/80 pb-3">
+              <span class="text-xs font-bold text-slate-400 font-mono tracking-wider">${order.id}</span>
+              <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold border ${statusBadgeClass}">
+                <span class="w-1.5 h-1.5 rounded-full ${pulseClass} ${order.status === 'Pending' ? 'pulse-dot' : ''}"></span>
+                ${order.status}
+              </span>
+            </div>
+            
+            <div class="space-y-0.5">
+              <h4 class="text-sm font-semibold text-slate-100">${escapeHTML(order.customerName)}</h4>
+              <p class="text-xs text-slate-400 select-all font-mono">${escapeHTML(order.email)}</p>
+            </div>
+            
+            <div class="flex items-center gap-3.5 bg-slate-950/60 p-3 rounded-xl border border-slate-800/40">
+              <img src="${order.image || getProductImage(order.itemSelect)}" 
+                   alt="${order.itemSelect}" 
+                   class="w-12 h-12 rounded-lg object-cover border border-slate-800 flex-shrink-0"
+                   onerror="this.src='${DefaultProductImage}'" />
+              <div class="flex-grow">
+                <div class="text-xs font-bold text-slate-200">${order.itemSelect}</div>
+                <div class="flex items-center gap-2 mt-1">
+                  <span class="text-[10px] text-indigo-400 font-bold bg-indigo-500/10 px-2 py-0.5 rounded-md border border-indigo-500/10">Size: ${order.size}</span>
+                  <span class="text-[10px] text-slate-400 font-medium">Qty: <b class="text-slate-200">${order.quantity}</b></span>
+                </div>
+              </div>
+            </div>
+            
+            <div class="flex items-center justify-between pt-2 border-t border-slate-800/60">
+              <div>
+                <p class="text-[10px] text-slate-500 uppercase tracking-wider font-semibold">Total Price</p>
+                <p class="text-sm font-bold text-indigo-300 font-mono mt-0.5">$${order.totalAmount.toFixed(2)}</p>
+              </div>
+              <div class="flex items-center gap-2">
+                <button 
+                  onclick="editOrder('${order.id}')"
+                  class="flex items-center justify-center w-8.5 h-8.5 rounded-xl bg-slate-950 hover:bg-indigo-500/10 border border-slate-800 hover:border-indigo-500/20 text-slate-400 hover:text-indigo-400 transition-all cursor-pointer"
+                  title="Edit Order"
+                >
+                  <i class="fa-solid fa-pen-to-square text-xs"></i>
+                </button>
+                <button 
+                  onclick="deleteOrder('${order.id}')"
+                  class="flex items-center justify-center w-8.5 h-8.5 rounded-xl bg-slate-950 hover:bg-red-500/10 border border-slate-800 hover:border-red-500/20 text-slate-400 hover:text-red-400 transition-all cursor-pointer"
+                  title="Delete Order"
+                >
+                  <i class="fa-solid fa-trash-can text-xs"></i>
+                </button>
+              </div>
+            </div>
+          `;
+          elements.ordersCardsMobile.appendChild(card);
         });
       }
 
