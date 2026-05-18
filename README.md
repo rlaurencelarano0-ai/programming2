@@ -81,6 +81,7 @@ This project can persist orders to Supabase in production. The app reads `window
    npm install
    npm run build
    ```
+6. After changes on one browser or device, reload the app or use the Refresh button in the UI to fetch the latest data from Supabase.
 
 ### Deploying to Vercel
 1. Add the environment variables to your Vercel project:

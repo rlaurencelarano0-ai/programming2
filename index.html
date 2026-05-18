@@ -401,6 +401,15 @@
                 <i class="fa-solid fa-chevron-down text-[10px]"></i>
               </span>
             </div>
+            <button
+              type="button"
+              id="refresh-remote-btn"
+              class="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl border border-slate-800 bg-slate-900/70 px-4 py-2 text-xs text-slate-100 transition hover:border-indigo-500/30 hover:bg-slate-950/80"
+              title="Refresh remote orders"
+            >
+              <i class="fa-solid fa-sync-alt text-[10px]"></i>
+              Refresh
+            </button>
           </div>
         </div>
 
@@ -594,6 +603,7 @@
       submitBtn: document.getElementById('submit-btn'),
       submitBtnText: document.getElementById('submit-btn-text'),
       cancelEditBtn: document.getElementById('cancel-edit-btn'),
+      refreshRemoteBtn: document.getElementById('refresh-remote-btn'),
       clearDataBtn: document.getElementById('clear-data-btn'),
       formTitle: document.getElementById('form-title'),
       editBadge: document.getElementById('edit-badge'),
@@ -732,6 +742,20 @@
       return true;
     }
 
+    async function refreshRemoteOrders() {
+      if (!supabase) {
+        showToast('Supabase is not configured. Remote refresh is unavailable.', 'error');
+        return;
+      }
+      const remoteOrders = await fetchOrdersFromSupabase();
+      if (remoteOrders) {
+        orders = remoteOrders;
+        saveToStorage();
+        render();
+        showToast('Remote orders refreshed.', 'success');
+      }
+    }
+
     async function clearSupabaseOrders() {
       if (!supabase) return false;
       const { error } = await supabase.from('orders').delete().neq('id', '');
@@ -815,7 +839,7 @@
             showToast('Supabase connected. No remote orders found yet.', 'info');
             await syncLocalToSupabase();
           } else {
-            await syncLocalToSupabase();
+            showToast('Supabase connected. No remote orders yet — using local cache.', 'info');
           }
         }
       } else {
@@ -1235,6 +1259,9 @@
     // ----------------------------------------------------
     elements.searchInput.addEventListener('input', render);
     elements.statusFilter.addEventListener('change', render);
+    if (elements.refreshRemoteBtn) {
+      elements.refreshRemoteBtn.addEventListener('click', refreshRemoteOrders);
+    }
 
     // Helper: Escape script injected strings for high XSS safety
     function escapeHTML(str) {
