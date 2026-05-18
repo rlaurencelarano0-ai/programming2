@@ -242,7 +242,7 @@
 
           <!-- Product Image Preview (Hidden by default, shown when item is selected) -->
           <div id="product-image-preview" class="hidden mt-3 p-4 rounded-2xl bg-slate-950/80 border border-slate-800 items-center gap-4">
-            <img id="preview-img" src="" alt="Product preview" class="w-20 h-20 rounded-2xl object-cover border border-slate-800 shadow-lg shadow-slate-950/20" onerror="this.src=DefaultProductImage" />
+            <img id="preview-img" src="" alt="Product preview" class="w-20 h-20 rounded-2xl object-cover border border-slate-800 shadow-lg shadow-slate-950/20" onerror="handleImgError(this)" />
             <div>
               <p id="preview-item-name" class="text-sm font-semibold text-slate-200"></p>
               <p class="text-xs text-slate-500 mt-1">Product preview loaded successfully.</p>
@@ -508,6 +508,11 @@
     function getProductImage(item) {
       return (Catalog[item] && Catalog[item].image) || DefaultProductImage;
     }
+
+    window.handleImgError = function(img) {
+      img.src = DefaultProductImage;
+      img.onerror = null;
+    };
 
     // Mock initial data seeded only on first load
     const MockOrders = [
@@ -837,7 +842,7 @@
                 <img src="${order.image || getProductImage(order.itemSelect)}" 
                      alt="${order.itemSelect} image" 
                      class="w-10 h-10 rounded-xl object-cover border border-slate-800 shadow-sm"
-                     onerror="this.src='${DefaultProductImage}'" />
+                     onerror="handleImgError(this)" />
                 <div>
                   <div class="font-medium text-slate-200 text-xs">${order.itemSelect}</div>
                   <div class="text-[10px] text-indigo-400 font-semibold bg-indigo-500/5 px-2 py-0.5 rounded border border-indigo-500/10 inline-block mt-0.5">Size: ${order.size}</div>
@@ -894,7 +899,7 @@
               <img src="${order.image || getProductImage(order.itemSelect)}" 
                    alt="${order.itemSelect}" 
                    class="w-12 h-12 rounded-lg object-cover border border-slate-800 flex-shrink-0"
-                   onerror="this.src='${DefaultProductImage}'" />
+                   onerror="handleImgError(this)" />
               <div class="flex-grow">
                 <div class="text-xs font-bold text-slate-200">${order.itemSelect}</div>
                 <div class="flex items-center gap-2 mt-1">
