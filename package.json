@@ -5,5 +5,8 @@
   "scripts": {
     "build": "node scripts/generate-config.js",
     "vercel-build": "npm run build"
+  },
+  "devDependencies": {
+    "dotenv": "^16.1.0"
   }
 }

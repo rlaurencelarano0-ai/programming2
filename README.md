@@ -75,7 +75,8 @@ This project can persist orders to Supabase in production. The app reads `window
 3. If using anonymous browser access, configure Row Level Security (RLS) policies or disable RLS for the `orders` table.
 4. Copy `.env.example` to `.env` and set your values:
    * `NEXT_PUBLIC_SUPABASE_URL`
-   * `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
+   * `NEXT_PUBLIC_SUPABASE_ANON_KEY` (recommended)
+   * Or alternatively: `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
 5. Use the build script to generate `config.js` locally or on Vercel:
    ```bash
    npm install
